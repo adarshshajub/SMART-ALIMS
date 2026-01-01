@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, session 
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 import os
 import re
 from flask_login import current_user, LoginManager, UserMixin, login_user, logout_user, login_required
 from dotenv import load_dotenv
 from .alerts_shedule import schedule_alert_job, load_alert_jobs, scheduler
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 login_manager = LoginManager()
@@ -107,9 +108,9 @@ def dashboard():
 #  Login Page 
 @app.route('/login', methods=['GET','POST'])
 def login():
-    msg = None
+    msg = session.pop('message', None)
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('dashboard'))
 
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
         username = request.form['username']
@@ -117,11 +118,11 @@ def login():
         
         conn = get_db_connection()
         c = conn.cursor()
-        c.execute('SELECT id, username FROM accounts WHERE username = ? AND password = ?',(username, password))
+        c.execute('SELECT id, username, password FROM accounts WHERE username = ? ',(username,))
         account = c.fetchone()
         conn.close()
 
-        if account:
+        if account and check_password_hash(account[2], password):
             user_id = account[0]
             user_obj = User(id=user_id, username=account[1])
             login_user(user_obj)
@@ -129,7 +130,6 @@ def login():
             return redirect(next_page or url_for('dashboard'))
         else:
             msg = 'Incorrect username/password!'
-            
     return render_template('login.html', msg=msg)
 
 # Logout page 
@@ -161,10 +161,11 @@ def register():
         elif not username or not password or not email:
             msg = 'Please fill out the form!'
         else:
-            c.execute('INSERT INTO accounts VALUES (NULL, ?, ?, ?)', (username, password, email))
+            hashed_password = generate_password_hash(password)
+            c.execute('INSERT INTO accounts VALUES (NULL, ?, ?, ?)', (username, hashed_password, email))
             conn.commit()
-            msg = 'You have successfully registered! You can now log in.'
-        
+            flash('You have successfully registered! You can now log in.', 'success')
+            return redirect(url_for('login'))
         conn.close()
         
     return render_template('register.html', msg=msg)

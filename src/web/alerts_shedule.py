@@ -124,5 +124,4 @@ def load_alert_jobs():
     conn.close()
 
     for alert in alerts:
-        print(f"Alert Trigger:  {alert}")
         schedule_alert_job(alert)
