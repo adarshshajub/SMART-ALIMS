@@ -156,7 +156,7 @@ SNOW_USER=
 SNOW_PASS=
 </pre>
 
-Note: To generate a Secret Key execute below code in terminal add the result value in the .env file 
+Note: To generate a Secret Key execute below code in terminal and add the result value in the .env file 
 <pre>
 python -c 'import secrets; print(secrets.token_hex(16))'
 </pre>
