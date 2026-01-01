@@ -143,6 +143,7 @@ pip install -r requirements.txt
 
 <h3>4. Configure Environment Variables</h3>
 
+Create a .env file in the project root:
 <pre>
 FLASK_SECRET_KEY=
 SMTP_HOST=
@@ -155,7 +156,7 @@ SNOW_USER=
 SNOW_PASS=
 </pre>
 
-Note: To generate a Secret Key execute below code in terminal 
+Note: To generate a Secret Key execute below code in terminal add the result value in the .env file 
 <pre>
 python -c 'import secrets; print(secrets.token_hex(16))'
 </pre>
