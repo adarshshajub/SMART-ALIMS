@@ -155,6 +155,11 @@ SNOW_USER=
 SNOW_PASS=
 </pre>
 
+Note: To generate a Secret Key execute below code in terminal 
+<pre>
+python -c 'import secrets; print(secrets.token_hex(16))'
+</pre>
+
 <h3>5. Start Background Worker</h3>
 
 <pre>
