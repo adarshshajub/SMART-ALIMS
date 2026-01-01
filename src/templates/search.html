@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Incident Search{% endblock %}
+{% block content %}
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Incident Search</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for("search") }}">
+                <div class="row g-3 align-items-end">
+                    <!-- Keyword -->
+                    <div class="col-md-4">
+                        <label class="form-label">Keyword</label>
+                        <input type="text"
+                               name="keyword"
+                               class="form-control"
+                               placeholder="Job ID, message, SNOW incident..."
+                               value="{{ keyword }}">
+                    </div>
+                    <!-- Severity -->
+                    <div class="col-md-2">
+                        <label class="form-label">Severity</label>
+                        <select name="severity" class="form-select">
+                            <option value="">All</option>
+                            <option value="HIGH" {% if severity == "HIGH" %}selected{% endif %}>HIGH</option>
+                            <option value="MEDIUM" {% if severity == "MEDIUM" %}selected{% endif %}>MEDIUM</option>
+                            <option value="LOW" {% if severity == "LOW" %}selected{% endif %}>LOW</option>
+                        </select>
+                    </div>
+                    <!-- Submit -->
+                    <div class="col-md-2 d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-search"></i> Search
+                        </button>
+                    </div>
+                    <!-- Reset -->
+                    <div class="col-md-2 d-grid">
+                        <a href="{{ url_for('search') }}" class="btn btn-secondary">Reset</a>
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <a href="{{ url_for('create_alert', keyword=keyword, severity=severity) }}"
+                           class="btn btn-warning">Configure Alert</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- ================= RESULTS ================= -->
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header">
+            <strong>Incidents</strong>
+        </div>
+        <div class="card-body p-0">
+            {% if results %}
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Job ID</th>
+                            <th>Severity</th>
+                            <th>Message</th>
+                            <th>Log Time</th>
+                            <th>SNOW Incident</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in results %}
+                            <tr>
+                                <td>{{ row.id }}</td>
+                                <td>{{ row.job_id }}</td>
+                                <td>
+                                    <span class="badge {% if row.severity == 'HIGH' %}bg-danger {% elif row.severity == 'MEDIUM' %}bg-warning {% else %}bg-success{% endif %} ">
+                                        {{ row.severity }}
+                                    </span>
+                                </td>
+                                <td>{{ row.message }}</td>
+                                <td>{{ row.log_timestamp }}</td>
+                                <td>{{ row.snow_incident or '-' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="p-3 text-center text-muted">No incidents found</div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

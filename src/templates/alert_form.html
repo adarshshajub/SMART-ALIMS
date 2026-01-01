@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if alert else 'Create' }} Alert{% endblock %}
+{% block content %}
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <strong>{{ 'Edit' if alert else 'Create' }} Email Alert</strong>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Keyword</label>
+                    <input type="text"
+                           name="keyword"
+                           class="form-control"
+                           value="{{ alert.keyword if alert else keyword }}"
+                           required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Severity</label>
+                    <select name="severity" class="form-select">
+                        <option value="">All</option>
+                        {% for s in ['HIGH','MEDIUM','LOW'] %}
+                            <option value="{{ s }}"
+                                    {% if alert and alert.severity == s or severity == s %}selected{% endif %}>
+                                {{ s }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email To</label>
+                    <input type="text"
+                           name="email_to"
+                           class="form-control"
+                           value="{{ alert.email_to if alert else '' }}"
+                           placeholder="user1@mail.com,user2@mail.com"
+                           required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email Subject</label>
+                    <input type="text"
+                           name="subject"
+                           class="form-control"
+                           value="{{ alert.subject if alert else '' }}"
+                           required>
+                </div>
+                <!-- NEW: EMAIL BODY -->
+                <div class="mb-3">
+                    <label class="form-label">Email Body</label>
+                    <textarea name="body"
+                              rows="5"
+                              class="form-control"
+                              placeholder="Write the email body here...">{{ alert.body if alert else '' }}</textarea>
+                </div>
+                <!-- NEW: INCLUDE SEARCH -->
+                <div class="form-check mb-3">
+                    <input class="orm-check-input"
+                           type="checkbox"
+                           name="include_search"
+                           value="1"
+                           {% if alert is none or alert.include_search %}checked{% endif %}>
+                    <label class="form-check-label">Append search keyword & severity to email body</label>
+                </div>
+                <hr>
+                <h6>Alert Schedule</h6>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Schedule Type</label>
+                        <select name="schedule_type" class="form-select">
+                            <option value="interval"
+                                    {% if alert and alert.schedule_type == 'interval' %}selected{% endif %}>
+                                Every N Minutes
+                            </option>
+                            <option value="hourly"
+                                    {% if alert and alert.schedule_type == 'hourly' %}selected{% endif %}>
+                                Hourly
+                            </option>
+                            <option value="daily"
+                                    {% if alert and alert.schedule_type == 'daily' %}selected{% endif %}>Daily</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Interval Value</label>
+                        <input type="number"
+                               min="1"
+                               name="schedule_value"
+                               class="form-control"
+                               value="{{ alert.schedule_value if alert else 5 }}">
+                        <small class="text-muted">Minutes (interval), Hours (hourly), Days (daily)</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Alert</button>
+                <a href="{{ url_for("alerts") }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

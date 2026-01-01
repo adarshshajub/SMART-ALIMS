@@ -41,9 +41,6 @@ def analyze_new_lines(file_path):
                 # Debug
                 print(f"[DEBUG] New log detected: {log}")
 
-                # -----------------------------
-                # RULE ENGINE – Detect Issues
-                # -----------------------------
                 severity = None
 
                 if level == "ERROR" :
@@ -66,10 +63,10 @@ def analyze_new_lines(file_path):
                 # -----------------------------
                 # CREATE SERVICENOW INCIDENT
                 # -----------------------------
-                short_desc = f"{severity} issue detected in job {job}"
+                short_desc = f"Severity {severity} issue detected in job {job}"
                 description = f"Log message: '{msg}' at {ts}"
 
-                snow_id = create_incident(short_desc, description)
+                snow_id = create_incident(short_desc, description, severity)
 
                 if snow_id:
                     print(f"[INFO] ServiceNow Incident Created: {snow_id}")

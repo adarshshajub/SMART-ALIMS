@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Automated Log Analysis{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Font Awesome -->
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        rel="stylesheet"
+    >
+
+    {% block extra_css %}{% endblock %}
+
+    <style>
+        .topbar {
+            background-color:  #0048ff;
+        }
+
+        .topbar a {
+            color: #FFFFFF;
+            font-style: oblique;
+            font-weight: bold;
+            font-size: larger;
+            text-decoration: none;
+        }
+
+        .topbar a:hover {
+            color: #E6F2F8;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<!-- ================= HEADER ================= -->
+<header class="topbar">
+    <div class="container-xxl d-flex align-items-center justify-content-between py-2">
+
+        <!-- Left: App Name -->
+        <div class="d-flex align-items-center">
+            <a href="{{ url_for('home') }}">
+                Automated Log Analysis Incident Management System
+            </a>
+        </div>
+
+        <!-- Right: Menu + User -->
+        <div class="d-flex align-items-center gap-4">
+
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('search') }}">Search</a>
+                <a href="{{ url_for('alerts') }}">Alert</a>
+            </div>
+
+            <!-- User Dropdown -->
+            {% if current_user.is_authenticated %}
+            <div class="dropdown">
+                <a
+                    class="d-flex align-items-center gap-2 text-decoration-none"
+                    href="#"
+                    id="userMenu"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                >
+                    <span>
+                        {{ current_user.username }}
+                    </span>
+                    <img
+                        src="{{ url_for('static', filename='user.png') }}"
+                        alt="avatar"
+                        class="rounded-circle"
+                        width="32"
+                        height="32"
+                    >
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li>
+                        <a class="dropdown-item text-center py-0" style="color: black; font-size: small;" href="{{ url_for('logout') }}">
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</header>
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="container-xxl my-4">
+    {% block content %}
+    <!-- Page content goes here -->
+    {% endblock %}
+</main>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

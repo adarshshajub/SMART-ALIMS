@@ -21,10 +21,36 @@ def init_db():
     """)
 
     c.execute("""
-    CREATE TABLE IF NOT EXISTS processed_logs (
-        log_hash TEXT PRIMARY KEY
-    );
-""")
+        CREATE TABLE IF NOT EXISTS processed_logs (
+            log_hash TEXT PRIMARY KEY
+        );
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS accounts (
+            id INTEGER  PRIMARY KEY AUTOINCREMENT,
+            username VARCHAR(50) NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            email VARCHAR(100) NOT NULL
+        );
+    """)
+
+    c.execute("""
+        CREATE TABLE alerts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            keyword TEXT NOT NULL,
+            severity TEXT,
+            email_to TEXT NOT NULL,
+            subject TEXT NOT NULL,
+            enabled INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            body TEXT,
+            include_search INTEGER DEFAULT 1,
+            last_triggered TEXT,
+            schedule_type TEXT DEFAULT 'interval',
+            schedule_value INTEGER DEFAULT 5
+        );
+    """)
 
     conn.commit()
     conn.close()
@@ -46,9 +72,6 @@ def save_incident(job_id, severity, message, timestamp, snow_id):
     """, (job_id, severity, message, timestamp, snow_id))
     conn.commit()
     conn.close()
-
-
-
 
 def hash_line(line):
     return hashlib.sha256(line.encode()).hexdigest()

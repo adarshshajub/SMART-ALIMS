@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Alerts{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between">
+        <strong>Email Alerts</strong>
+        <a href="{{ url_for('create_alert') }}" class="btn btn-sm btn-light">
+            + Create Alert
+        </a>
+    </div>
+
+    <div class="card-body p-0">
+        {% if alerts %}
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Keyword</th>
+                    <th>Severity</th>
+                    <th>Email</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in alerts %}
+                <tr>
+                    <td>{{ a.keyword }}</td>
+                    <td>{{ a.severity or "ALL" }}</td>
+                    <td>{{ a.email_to }}</td>
+                    <td>{{ a.subject }}</td>
+                    <td>
+                        {% if a.enabled %}
+                            <span class="badge bg-success">Enabled</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Disabled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('edit_alert', alert_id=a.id) }}"
+                        class="btn btn-sm btn-outline-secondary">
+                            Edit
+                        </a>
+
+                        <a href="{{ url_for('toggle_alert', alert_id=a.id) }}"
+                        class="btn btn-sm btn-outline-primary">
+                            Enable / Disable
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="p-3 text-muted text-center">No alerts configured</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
