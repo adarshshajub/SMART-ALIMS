@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div>
+    <h3 class="mb-0">My Dashboard</h3>
+    <small class="text-muted">Hello, {{ username }}</small>
+    <br><br>
+</div>
+
+<!-- ================= KPI CARDS ================= -->
+<div class="row g-3 mb-4">
+
+    <div class="col-md-3">
+        <div class="card text-white bg-danger shadow-sm">
+            <div class="card-body text-center">
+                <h6>High Severity</h6>
+                <h2>{{ high_count }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-dark bg-warning shadow-sm">
+            <div class="card-body text-center">
+                <h6>Medium Severity</h6>
+                <h2>{{ medium_count }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-white bg-success shadow-sm">
+            <div class="card-body text-center">
+                <h6>Low Severity</h6>
+                <h2>{{ low_count }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-primary text-white shadow-sm">
+            <div class="card-body text-center">
+                <h6>Total Incidents</h6>
+                <h2>{{ total_incidents }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= ALERT STATS ================= -->
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h6>Active Alerts</h6>
+                <h3 class="text-success">{{ active_alerts }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h6>Disabled Alerts</h6>
+                <h3 class="text-muted">{{ disabled_alerts }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h6>Total Alert Triggers</h6>
+                <h3 class="text-primary">{{ triggered_alerts }}</h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= RECENT INCIDENTS ================= -->
+<div class="card shadow-sm">
+    <div class="card-header">
+        <strong>Recent Incidents</strong>
+    </div>
+
+    <div class="card-body p-0">
+        {% if recent_incidents %}
+        <table class="table table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Job</th>
+                    <th>Severity</th>
+                    <th>Message</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in recent_incidents %}
+                <tr>
+                    <td>{{ row.job_id }}</td>
+                    <td>
+                        <span class="badge
+                            {% if row.severity == 'HIGH' %}bg-danger
+                            {% elif row.severity == 'MEDIUM' %}bg-warning
+                            {% else %}bg-success{% endif %}
+                        ">
+                            {{ row.severity }}
+                        </span>
+                    </td>
+                    <td>{{ row.message[:60] }}{% if row.message|length > 60 %}...{% endif %}</td>
+                    <td>{{ row.log_timestamp }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="p-3 text-muted text-center">No incidents yet</div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

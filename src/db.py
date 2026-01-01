@@ -3,7 +3,7 @@ import os
 import hashlib
 
 # absolute path → root folder of your project
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(ROOT_DIR, "incidents.db")
 
 def init_db():
@@ -36,7 +36,7 @@ def init_db():
     """)
 
     c.execute("""
-        CREATE TABLE alerts (
+        CREATE TABLE IF NOT EXISTS alerts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             keyword TEXT NOT NULL,
             severity TEXT,
@@ -49,6 +49,15 @@ def init_db():
             last_triggered TEXT,
             schedule_type TEXT DEFAULT 'interval',
             schedule_value INTEGER DEFAULT 5
+        );
+    """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS alert_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            alert_id INTEGER,
+            triggered_at TEXT,
+            incident_count INTEGER
         );
     """)
 
