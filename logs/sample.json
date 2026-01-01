@@ -1,6 +1,12 @@
 
 {"timestamp":"2025-01-01T10:20:00Z", "level":"ERROR", "source":"delivery", "message":"Failed to connect to server", "job_id":"JOB111"}
 {"timestamp":"2025-01-01T10:20:00Z", "level":"ERROR", "source":"delivery", "message":"Failed to connect to server", "job_id":"JOB101"}
-
+{"timestamp":"2026-01-01T10:20:00Z", "level":"ERROR", "source":"delivery", "message":"null values found", "job_id":"JOB101"}
+{"timestamp":"2026-01-01T11:00:00Z", "level":"ERROR", "source":"delivery", "message":"null values found", "job_id":"JOB101"}
+{"timestamp":"2026-01-01T11:06:00Z", "level":"ERROR", "source":"delivery", "message":"null values found", "job_id":"JOB101"}
+{"timestamp":"2026-01-01T11:08:00Z", "level":"ERROR", "source":"delivery", "message":"null values found", "job_id":"JOB101"}
+{"timestamp":"2026-01-01T11:08:10Z", "level":"ERROR", "source":"delivery", "message":"null values found", "job_id":"JOB102"}
+{"timestamp":"2026-01-01T11:08:00Z", "level":"ERROR", "source":"delivery", "message":"file missing", "job_id":"JOB101"}
+{"timestamp":"2026-01-01T11:12:00Z", "level":"ERROR", "source":"delivery", "message":"file missing", "job_id":"JOB101"}
 
 

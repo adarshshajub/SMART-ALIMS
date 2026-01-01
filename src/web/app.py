@@ -3,10 +3,8 @@ import sqlite3
 import os
 import re
 from flask_login import current_user, LoginManager, UserMixin, login_user, logout_user, login_required
-from flask_apscheduler import APScheduler
-from datetime import datetime, timezone
-from email_utils import send_email
 from dotenv import load_dotenv
+from .alerts_shedule import schedule_alert_job, load_alert_jobs, scheduler
 
 app = Flask(__name__)
 login_manager = LoginManager()
@@ -54,20 +52,57 @@ def load_user(user_id):
 
 # --- Application Routes ---
 
-@app.route('/')
-@login_required 
-def home():
+@app.route("/")
+@login_required
+def dashboard():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    query = "SELECT * FROM incidents ORDER BY log_timestamp DESC"
+    # --- Incident KPIs ---
+    cursor.execute("SELECT COUNT(*) FROM incidents WHERE severity = 'HIGH'")
+    high_count = cursor.fetchone()[0]
 
-    cursor.execute(query)
-    results = cursor.fetchall()
+    cursor.execute("SELECT COUNT(*) FROM incidents WHERE severity = 'MEDIUM'")
+    medium_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM incidents WHERE severity = 'LOW'")
+    low_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM incidents")
+    total_incidents = cursor.fetchone()[0]
+
+    # --- Alerts KPIs ---
+    cursor.execute("SELECT COUNT(*) FROM alerts WHERE enabled = 1")
+    active_alerts = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM alerts WHERE enabled = 0")
+    disabled_alerts = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM alert_history")
+    triggered_alerts = cursor.fetchone()[0]
+
+    # --- Recent Incidents ---
+    cursor.execute("""
+        SELECT * FROM incidents
+        ORDER BY log_timestamp DESC
+        LIMIT 10
+    """)
+    recent_incidents = cursor.fetchall()
+
     conn.close()
 
-    return render_template('index.html', results=results, username=current_user.username)
-
+    return render_template(
+        "dashboard.html",
+        high_count=high_count,
+        medium_count=medium_count,
+        low_count=low_count,
+        total_incidents=total_incidents,
+        active_alerts=active_alerts,
+        disabled_alerts=disabled_alerts,
+        triggered_alerts=triggered_alerts,
+        recent_incidents=recent_incidents,
+        username=current_user.username
+    )
 
 #  Login Page 
 @app.route('/login', methods=['GET','POST'])
@@ -91,7 +126,7 @@ def login():
             user_obj = User(id=user_id, username=account[1])
             login_user(user_obj)
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('home'))
+            return redirect(next_page or url_for('dashboard'))
         else:
             msg = 'Incorrect username/password!'
             
@@ -300,135 +335,11 @@ def edit_alert(alert_id):
     return render_template("alert_form.html", alert=alert)
 
 
-scheduler = APScheduler()
-
-def schedule_alert_job(alert):
-    job_id = f"alert_{alert['id']}"
-
-    if scheduler.get_job(job_id):
-        scheduler.remove_job(job_id)
-
-    if not alert["enabled"]:
-        return
-
-    if alert["schedule_type"] == "interval":
-        scheduler.add_job(
-            id=job_id,
-            func=process_single_alert,
-            trigger="interval",
-            minutes=alert["schedule_value"],
-            args=[alert["id"]]
-        )
-
-    elif alert["schedule_type"] == "hourly":
-        scheduler.add_job(
-            id=job_id,
-            func=process_single_alert,
-            trigger="interval",
-            hours=alert["schedule_value"],
-            args=[alert["id"]]
-        )
-
-    elif alert["schedule_type"] == "daily":
-        scheduler.add_job(
-            id=job_id,
-            func=process_single_alert,
-            trigger="interval",
-            days=alert["schedule_value"],
-            args=[alert["id"]]
-        )
-
-
-def process_single_alert(alert_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM alerts WHERE id = ?", (alert_id,))
-    alert = cursor.fetchone()
-
-    if not alert or not alert["enabled"]:
-        conn.close()
-        return
-
-    last_triggered = alert["last_triggered"] or "1970-01-01"
-
-    query = """
-        SELECT * FROM incidents
-        WHERE log_timestamp > ?
-        AND (
-            job_id LIKE ?
-            OR message LIKE ?
-        )
-    """
-    params = [
-        last_triggered,
-        f"%{alert['keyword']}%",
-        f"%{alert['keyword']}%",
-    ]
-
-    if alert["severity"]:
-        query += " AND severity = ?"
-        params.append(alert["severity"])
-
-    cursor.execute(query, params)
-    incidents = cursor.fetchall()
-
-    if incidents:
-        email_body = build_alert_email(alert, incidents)
-
-        send_email(
-            to_emails=alert["email_to"],
-            subject=alert["subject"],
-            body=email_body
-        )
-
-        cursor.execute("""
-            UPDATE alerts
-            SET last_triggered = ?
-            WHERE id = ?
-        """, (datetime.now(timezone.utc).isoformat(), alert_id))
-
-        conn.commit()
-
-    conn.close()
-
-
-def build_alert_email(alert, incidents):
-    body = alert["body"] or ""
-
-    if alert["include_search"]:
-        body += "\n\n--- Alert Details ---\n"
-        body += f"Keyword: {alert['keyword']}\n"
-        body += f"Severity: {alert['severity'] or 'ALL'}\n"
-        body += f"Matched Incidents: {len(incidents)}\n\n"
-
-        for inc in incidents[:5]:  # limit to avoid huge emails
-            body += (
-                f"- [{inc['severity']}] "
-                f"{inc['job_id']} | {inc['message']} | "
-                f"{inc['log_timestamp']}\n"
-            )
-
-    return body
-
-
-def load_alert_jobs():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM alerts WHERE enabled = 1")
-    alerts = cursor.fetchall()
-
-    conn.close()
-
-    for alert in alerts:
-        schedule_alert_job(alert)
-
 if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
     load_alert_jobs()
 
     app.run(
-        debug=True
+        debug=False
     )
