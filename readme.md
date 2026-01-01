@@ -54,8 +54,6 @@ background processing from the web-based dashboard and alert management layer.
 
 <hr>
 
-<hr>
-
 <h2>Database Design</h2>
 
 <h3>Core Tables</h3>
@@ -124,13 +122,26 @@ All active alerts are reloaded automatically on application startup.
 
 <h2>How to Run the Project</h2>
 
-<h3>1. Setup Environment</h3>
+<h3>1. Clone the Repository</h3>
 
+<pre>
+git clone https://github.com/adarshshajub/SMART-ALIMS.git
+cd SMART-ALIMS
+</pre>
+
+<h3>2. Create Virtual Environment</h3>
+
+<pre>
+python -m venv venv
+venv\Scripts\activate
+</pre>
+
+<h3>3. Install Dependencies</h3>
 <pre>
 pip install -r requirements.txt
 </pre>
 
-<h3>2. Configure Environment Variables</h3>
+<h3>4. Configure Environment Variables</h3>
 
 <pre>
 FLASK_SECRET_KEY=
@@ -144,13 +155,13 @@ SNOW_USER=
 SNOW_PASS=
 </pre>
 
-<h3>3. Start Background Worker</h3>
+<h3>5. Start Background Worker</h3>
 
 <pre>
 python -m src.worker.main
 </pre>
 
-<h3>4. Start Web Application</h3>
+<h3>6. Start Web Application</h3>
 
 <pre>
 python -m src.web.app
